@@ -113,7 +113,13 @@ plt.show()
 #  his way we can see if there are any clusters of activity in the principal component space that are related to the behavior of the worm.
 
 # Task 2: TODO: plot the first principle component versus the activity of AVA, which is a reversal neuron, to see if there is any correlation between the two.
+bx = plt.figure().add_subplot()
+bx.plot(pca_result[:, 0], label='PC1', color='blue')
+bx.plot(trace_df[neuron_id_df.loc[neuron_id_df['ID1'] == "AVAL", 'Neuron ID']], color='black', label='AVAL')
+bx.plot(trace_df[neuron_id_df.loc[neuron_id_df['ID1'] == "AVAR", 'Neuron ID']], color='gray', label='AVAR')
+bx.legend(loc='upper right')
 
+plt.show()
 
 # Task 3: TODO: look up the contribution of every identified neuron to the first principal component,
 # and see if there are any interesting neurons that contribute a lot to the first principal component,

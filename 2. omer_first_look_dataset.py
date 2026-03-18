@@ -72,8 +72,9 @@ trace_df = pd.read_hdf(path_to_traces)
 trace_df = trace_df.interpolate(method='linear', axis=0, limit_direction='both')
 
 # first we need to order the neurons based on how similar they are to each other
-distance_matrix = squareform(pairwise_distances(trace_df.T, metric='correlation')) # use correlation distance to measure similarity between neurons
-linkage_matrix = linkage(distance_matrix, method='average', metric='correlation') # use average linkage to cluster the neurons based on their similarity
+# used squareform on to make the matrix into a 1D array otherwise the linkage thinks its a raw data matrix instead of distances
+distance_array = squareform(pairwise_distances(trace_df.T, metric='correlation')) # use correlation distance to measure similarity between neurons
+linkage_matrix = linkage(distance_array, method='average', metric='correlation') # use average linkage to cluster the neurons based on their similarity
 dendrogram = dendrogram(linkage_matrix, no_labels=True, no_plot=True) # get the order of the neurons based on the dendrogram
 trace_df = trace_df.iloc[:,dendrogram['leaves']] # reorder the neurons based on the order of the dendrogram
 
@@ -91,9 +92,9 @@ pca = PCA(n_components=3)
 pca_result = pca.fit_transform(trace_df)
 
 # Get lists of time points according to the worm behavior
-reverse_time_points = list(map(int, [x / 24 for x in beh_annotations_df[beh_annotations_df[1] == 1][0].tolist()]))
-forward_time_points = list(map(int, [x / 24 for x in beh_annotations_df[beh_annotations_df[1] == -1][0].tolist()]))
-stay_time_points    = list(map(int, [x / 24 for x in beh_annotations_df[beh_annotations_df[1] == 0][0].tolist()]))
+reverse_time_points = list(map(int, beh_annotations_df[beh_annotations_df[1] == 1].index.tolist()))
+forward_time_points = list(map(int, beh_annotations_df[beh_annotations_df[1] == -1].index.tolist()))
+stay_time_points    = list(map(int, beh_annotations_df[beh_annotations_df[1] == 0].index.tolist()))
 
 # plot the first 3 principal components but as a line plot in 3d
 fig = plt.figure()
@@ -112,6 +113,7 @@ plt.show()
 #  his way we can see if there are any clusters of activity in the principal component space that are related to the behavior of the worm.
 
 # Task 2: TODO: plot the first principle component versus the activity of AVA, which is a reversal neuron, to see if there is any correlation between the two.
+
 
 # Task 3: TODO: look up the contribution of every identified neuron to the first principal component,
 # and see if there are any interesting neurons that contribute a lot to the first principal component,

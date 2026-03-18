@@ -15,6 +15,7 @@
 
 # - imports
 import matplotlib
+from scipy.spatial.distance import squareform
 
 matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
@@ -71,7 +72,7 @@ trace_df = pd.read_hdf(path_to_traces)
 trace_df = trace_df.interpolate(method='linear', axis=0, limit_direction='both')
 
 # first we need to order the neurons based on how similar they are to each other
-distance_matrix = pairwise_distances(trace_df.T, metric='correlation') # use correlation distance to measure similarity between neurons
+distance_matrix = squareform(pairwise_distances(trace_df.T, metric='correlation')) # use correlation distance to measure similarity between neurons
 linkage_matrix = linkage(distance_matrix, method='average', metric='correlation') # use average linkage to cluster the neurons based on their similarity
 dendrogram = dendrogram(linkage_matrix, no_labels=True, no_plot=True) # get the order of the neurons based on the dendrogram
 trace_df = trace_df.iloc[:,dendrogram['leaves']] # reorder the neurons based on the order of the dendrogram

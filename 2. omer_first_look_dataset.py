@@ -18,12 +18,16 @@ import matplotlib
 
 matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
-
-# TODO: add the path to the data in your computer
-path_to_traces = r".\1per\2024-07-12_15-57_1per_worm2-2024-07-12_ratio.h5" #TODO: Change path
-
-# use pandas to open the data
 import pandas as pd
+
+path_to_traces = r".\1per\2024-07-12_15-57_1per_worm2-2024-07-12_ratio.h5"
+path_to_behavioral_annotations_1per  = r".\1per\2024-07-12_15-57_1per_worm2-2024-07-12_beh_annotation.csv"
+beh_annotations_df = pd.read_csv(path_to_behavioral_annotations_1per, header=None)
+beh_annotations_df = beh_annotations_df.iloc[::24]
+# downsample beh_annotations_df index by 24
+beh_annotations_df.index = beh_annotations_df.index // 24
+
+
 trace_df = pd.read_hdf(path_to_traces)
 
 # dataframe format is:
@@ -85,10 +89,17 @@ from sklearn.decomposition import PCA
 pca = PCA(n_components=3)
 pca_result = pca.fit_transform(trace_df)
 
+# Get lists of time points according to the worm behavior
+reverse_time_points = list(map(int, [x / 24 for x in beh_annotations_df[beh_annotations_df[1] == 1][0].tolist()]))
+forward_time_points = list(map(int, [x / 24 for x in beh_annotations_df[beh_annotations_df[1] == -1][0].tolist()]))
+stay_time_points    = list(map(int, [x / 24 for x in beh_annotations_df[beh_annotations_df[1] == 0][0].tolist()]))
+
 # plot the first 3 principal components but as a line plot in 3d
 fig = plt.figure()
 ax = fig.add_subplot(111, projection='3d')
-ax.plot(pca_result[:,0], pca_result[:,1], pca_result[:,2], color='blue')
+ax.plot(pca_result[forward_time_points,0], pca_result[forward_time_points,1], pca_result[forward_time_points,2], color='blue')
+ax.plot(pca_result[reverse_time_points,0], pca_result[reverse_time_points,1], pca_result[reverse_time_points,2], color='red')
+ax.plot(pca_result[stay_time_points,0], pca_result[stay_time_points,1], pca_result[stay_time_points,2], color='green')
 ax.set_xlabel('PC1')
 ax.set_ylabel('PC2')
 ax.set_zlabel('PC3')

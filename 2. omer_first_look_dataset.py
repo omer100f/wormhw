@@ -105,7 +105,6 @@ ax.plot(pca_result[stay_time_points,0], pca_result[stay_time_points,1], pca_resu
 ax.set_xlabel('PC1')
 ax.set_ylabel('PC2')
 ax.set_zlabel('PC3')
-plt.show()
 
 # Task 1: TODO: color the 3d line plot based on the behavior annotations,
 #  so we can see if there are any patterns in the data that are related to the behavior of the worm.
@@ -119,14 +118,28 @@ bx.plot(trace_df[neuron_id_df.loc[neuron_id_df['ID1'] == "AVAL", 'Neuron ID']], 
 bx.plot(trace_df[neuron_id_df.loc[neuron_id_df['ID1'] == "AVAR", 'Neuron ID']], color='gray', label='AVAR')
 bx.legend(loc='upper right')
 
-plt.show()
-
 # Task 3: TODO: look up the contribution of every identified neuron to the first principal component,
 # and see if there are any interesting neurons that contribute a lot to the first principal component,
 # which is the one that explains the most variance in the data. This can be done by looking at the components_ attribute of the PCA object,
 # which gives the contribution of each original feature (neuron) to each principal component.
 # We can then plot these contributions as a bar plot to see which neurons contribute the most to the first principal component.
 # Note: You will need to add the neuron IDs to the dataframe to do that!
+components_pc1 = pca.components_[0].tolist()
 
+# Get neuron names from neuron_id_df. using the original column name if no ID1
+id_mapping = dict(zip(neuron_id_df['Neuron ID'], neuron_id_df['ID1']))
+neuron_names = [id_mapping.get(col, col) if pd.notna(id_mapping.get(col, col)) else col for col in trace_df.columns]
+
+# Sort the neurons based on their contribution to PC1
+sorted_pairs = sorted(zip(neuron_names, components_pc1), key=lambda x: x[1])
+sorted_neuron_names, sorted_components_pc1 = zip(*sorted_pairs)
+
+pc1_components_graph = plt.figure().add_subplot()
+pc1_components_graph.set_xlabel('neurons')
+pc1_components_graph.set_ylabel('contribution to pc1')
+pc1_components_graph.bar(sorted_neuron_names, sorted_components_pc1, color='blue')
+plt.xticks(rotation=90, fontsize=6)
+plt.tight_layout()
+plt.show()
 # Task 4: TODO: compare the activity across the agarose conditions, and the contributions of the neurons to the first principal component.
 
